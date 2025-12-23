@@ -18,6 +18,7 @@ type SessionPayload = {
 export interface AuthenticatedUser {
   id: string;
   walletAddress: string;
+  displayName?: string | null;
 }
 
 function getJwtSecret() {
@@ -51,7 +52,11 @@ export async function getOrCreateUser(
     });
 
     if (existingUser) {
-      return { id: existingUser.id, walletAddress: existingUser.walletAddress };
+      return {
+        id: existingUser.id,
+        walletAddress: existingUser.walletAddress,
+        displayName: existingUser.displayName,
+      };
     }
 
     // Create user if it doesn't exist
@@ -65,7 +70,11 @@ export async function getOrCreateUser(
       return null;
     }
 
-    return { id: newUser.id, walletAddress: newUser.walletAddress };
+    return {
+      id: newUser.id,
+      walletAddress: newUser.walletAddress,
+      displayName: newUser.displayName,
+    };
   } catch (error) {
     // If DB operations fail (e.g., RLS issues, not configured), return null
     // This allows the app to work without DB, but DB features won't work
@@ -150,7 +159,13 @@ export async function getAuthenticatedUserWithDb(): Promise<AuthenticatedUser | 
     const user = await db.query.users.findFirst({
       where: eq(users.id, authUser.id),
     });
-    return user ? { id: user.id, walletAddress: user.walletAddress } : null;
+    return user
+      ? {
+          id: user.id,
+          walletAddress: user.walletAddress,
+          displayName: user.displayName,
+        }
+      : null;
   }
 
   // Wallet address - get or create DB user

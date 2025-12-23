@@ -13,6 +13,8 @@ type AuthStatus =
 interface AuthUser {
   id: string;
   walletAddress: string;
+  displayName?: string | null;
+  avatarUrl?: string | null;
 }
 
 interface AuthState {
