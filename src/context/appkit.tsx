@@ -26,8 +26,8 @@ if (!projectId) {
 const metadata = {
   name: "Innit",
   description: "The Social Layer",
-  url: "http://localhost:3000",
-  icons: ["http://localhost:3000/favicon.ico"],
+  url: "https://innit.fun",
+  icons: ["https://innit.fun/favicon.ico"],
 };
 
 const solanaAdapter = new SolanaAdapter({
