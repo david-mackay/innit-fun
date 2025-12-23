@@ -138,6 +138,24 @@ export const reactions = pgTable(
   })
 );
 
+export const postComments = pgTable(
+  "post_comments",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    postId: uuid("post_id")
+      .notNull()
+      .references(() => posts.id, { onDelete: "cascade" }),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    mediaUrl: text("media_url").notNull(), // GIF URL
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (table) => ({
+    postIdx: index("post_comments_post_idx").on(table.postId),
+  })
+);
+
 export const friendships = pgTable(
   "friendships",
   {
@@ -208,6 +226,7 @@ export const usersRelations = relations(users, ({ many }) => ({
   posts: many(posts),
   reactions: many(reactions),
   stacks: many(postStacks),
+  comments: many(postComments),
   sentInvites: many(invites),
   friendships1: many(friendships, { relationName: "friendships1" }),
   friendships2: many(friendships, { relationName: "friendships2" }),
@@ -232,6 +251,7 @@ export const postsRelations = relations(posts, ({ one, many }) => ({
   }),
   stacks: many(postStacks),
   reactions: many(reactions),
+  comments: many(postComments),
   attendees: many(eventAttendees),
 }));
 
@@ -264,6 +284,17 @@ export const reactionsRelations = relations(reactions, ({ one }) => ({
   }),
   user: one(users, {
     fields: [reactions.userId],
+    references: [users.id],
+  }),
+}));
+
+export const postCommentsRelations = relations(postComments, ({ one }) => ({
+  post: one(posts, {
+    fields: [postComments.postId],
+    references: [posts.id],
+  }),
+  user: one(users, {
+    fields: [postComments.userId],
     references: [users.id],
   }),
 }));
@@ -305,6 +336,7 @@ export type User = typeof users.$inferSelect;
 export type Post = typeof posts.$inferSelect;
 export type PostStack = typeof postStacks.$inferSelect;
 export type Reaction = typeof reactions.$inferSelect;
+export type PostComment = typeof postComments.$inferSelect;
 export type Friendship = typeof friendships.$inferSelect;
 export type Invite = typeof invites.$inferSelect;
 export type Message = typeof messages.$inferSelect;

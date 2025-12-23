@@ -1,9 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { formatDistanceToNow } from "date-fns";
 import { ImageUpload } from "./ImageUpload";
 import { useWalletAuth } from "@/hooks/useWalletAuth";
+import { GifPicker } from "./GifPicker";
+import { StackCarousel } from "./StackCarousel";
 
 const VIBE_STYLES: Record<string, string> = {
   chill:
@@ -48,8 +50,53 @@ export function PostCard({ post, currentUserId }: PostCardProps) {
   // Share State
   const [shareLoading, setShareLoading] = useState(false);
 
+  // Stack Viewer State
+  const [viewingStackIndex, setViewingStackIndex] = useState<number | null>(
+    null
+  );
+  // Removed scrollContainerRef as it's now handled in StackCarousel
+
+  // GIF Comment State
+  const [comments, setComments] = useState(post.comments || []); // Needs backend support first
+  const [showGifPicker, setShowGifPicker] = useState(false);
+  const [loadingComment, setLoadingComment] = useState(false);
+  const gifPickerRef = useRef<HTMLDivElement>(null);
+
   const vibeStyle = VIBE_STYLES[post.vibe] || VIBE_STYLES.chill;
   const isExpired = post.expiresAt && new Date(post.expiresAt) < new Date();
+
+  // Close GIF picker on outside click
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        gifPickerRef.current &&
+        !gifPickerRef.current.contains(event.target as Node)
+      ) {
+        setShowGifPicker(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  // Fetch comments on mount if not provided (simple implementation)
+  useEffect(() => {
+    const fetchComments = async () => {
+      try {
+        const res = await fetch(`/api/posts/${post.id}/comments`);
+        if (res.ok) {
+          const data = await res.json();
+          setComments(data.comments);
+        }
+      } catch (err) {
+        console.error("Failed to fetch comments", err);
+      }
+    };
+    // Only fetch if we suspect there are comments or just once on load
+    fetchComments();
+  }, [post.id]);
 
   // Permission Logic
   const canFeature = post.targetUserId
@@ -191,6 +238,45 @@ export function PostCard({ post, currentUserId }: PostCardProps) {
     } finally {
       setReacting(false);
     }
+  };
+
+  const handleGifSelect = async (
+    gif: any,
+    e: React.SyntheticEvent<HTMLElement, Event>
+  ) => {
+    e.preventDefault();
+    if (!user) return;
+
+    setLoadingComment(true);
+    setShowGifPicker(false);
+
+    try {
+      const mediaUrl = gif.images.fixed_height.url; // Use fixed height for better list display
+      const res = await fetch(`/api/posts/${post.id}/comments`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ mediaUrl }),
+      });
+
+      const data = await res.json();
+      if (data.comment) {
+        setComments([data.comment, ...comments]);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoadingComment(false);
+    }
+  };
+
+  const openStackViewer = (index: number) => {
+    setViewingStackIndex(index);
+    // document.body.style.overflow = "hidden"; // Prevent background scroll
+  };
+
+  const closeStackViewer = () => {
+    setViewingStackIndex(null);
+    // document.body.style.overflow = "auto";
   };
 
   // BROADCAST CARD
@@ -367,10 +453,11 @@ export function PostCard({ post, currentUserId }: PostCardProps) {
       {/* Stacks Display */}
       {localStacks.length > 0 && (
         <div className="mt-3 bg-black/20 rounded-lg p-2 flex gap-2 overflow-x-auto hide-scrollbar">
-          {localStacks.map((stack: any) => (
+          {localStacks.map((stack: any, index: number) => (
             <div
               key={stack.id}
-              className="flex-shrink-0 relative w-16 h-16 rounded overflow-hidden group"
+              className="flex-shrink-0 relative w-16 h-16 rounded overflow-hidden group cursor-pointer hover:ring-2 ring-indigo-500/50 transition-all"
+              onClick={() => openStackViewer(index)}
             >
               <img
                 src={stack.mediaUrl}
@@ -390,7 +477,7 @@ export function PostCard({ post, currentUserId }: PostCardProps) {
       )}
 
       {/* Actions Bar */}
-      <div className="flex items-center justify-between pt-3 border-t border-white/10 mt-3">
+      <div className="flex items-center justify-between pt-3 border-t border-white/10 mt-3 relative">
         <div className="flex gap-4">
           <button
             onClick={handleReaction}
@@ -403,14 +490,38 @@ export function PostCard({ post, currentUserId }: PostCardProps) {
             {hasReacted ? "❤️" : "🤍"} {localReactions.length || 0}
           </button>
 
-          {post.type !== "event" && (
+          {/* GIF Comment Button */}
+          <div className="relative" ref={gifPickerRef}>
             <button
-              onClick={() => setShowStackUpload(!showStackUpload)}
-              className="text-slate-400 hover:text-indigo-400 transition-colors flex items-center gap-1 text-sm"
+              onClick={() => setShowGifPicker(!showGifPicker)}
+              className={`transition-colors flex items-center gap-1 text-sm ${
+                showGifPicker
+                  ? "text-indigo-400"
+                  : "text-slate-400 hover:text-indigo-400"
+              }`}
             >
-              📚 Stack
+              <span>💬</span> GIF
             </button>
-          )}
+
+            {showGifPicker && (
+              <div className="absolute bottom-full left-0 mb-2 w-[320px] h-[400px] z-50 shadow-2xl rounded-xl animate-in fade-in zoom-in-95 duration-200">
+                <GifPicker
+                  onSelect={handleGifSelect}
+                  searchTerm={post.vibe || ""}
+                />
+              </div>
+            )}
+          </div>
+
+          <ImageUpload
+            onUpload={handleStackUpload}
+            label="📚 Stack"
+            className="!flex-row !justify-start !gap-0"
+          >
+            <div className="text-slate-400 hover:text-indigo-400 transition-colors flex items-center gap-1 text-sm cursor-pointer">
+              {loadingStack ? "..." : "📚 Stack"}
+            </div>
+          </ImageUpload>
         </div>
 
         <div className="flex gap-3">
@@ -441,17 +552,54 @@ export function PostCard({ post, currentUserId }: PostCardProps) {
         </div>
       </div>
 
-      {showStackUpload && (
-        <div className="mt-3 p-3 bg-black/30 rounded-lg border border-white/10 animate-in fade-in slide-in-from-top-2">
-          <p className="text-xs text-slate-400 mb-2">
-            Add to the vibe (Stack a photo/video)
-          </p>
-          <ImageUpload
-            onUpload={handleStackUpload}
-            label={loadingStack ? "Stacking..." : "Upload Media"}
-            className="!flex-row !justify-start"
-          />
+      {/* Comments List */}
+      {comments.length > 0 && (
+        <div className="mt-4 pt-4 border-t border-white/5 space-y-3">
+          {comments.slice(0, 3).map((comment: any) => (
+            <div key={comment.id} className="flex gap-3 group">
+              <img
+                src={
+                  comment.user?.avatarUrl ||
+                  `https://api.dicebear.com/7.x/avataaars/svg?seed=${comment.userId}`
+                }
+                className="w-8 h-8 rounded-full border border-white/10 flex-shrink-0"
+              />
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-xs font-bold text-slate-300">
+                    {comment.user?.displayName || "Unknown"}
+                  </span>
+                  <span className="text-[10px] text-slate-500">
+                    {formatDistanceToNow(new Date(comment.createdAt), {
+                      addSuffix: true,
+                    })}
+                  </span>
+                </div>
+                <div className="rounded-lg overflow-hidden inline-block border border-white/10 max-w-[200px]">
+                  <img
+                    src={comment.mediaUrl}
+                    className="w-full h-auto"
+                    alt="GIF comment"
+                  />
+                </div>
+              </div>
+            </div>
+          ))}
+          {comments.length > 3 && (
+            <button className="text-xs text-slate-500 hover:text-indigo-400 w-full text-left pl-11">
+              View all {comments.length} comments...
+            </button>
+          )}
         </div>
+      )}
+
+      {/* Full Screen Stack Viewer Modal */}
+      {viewingStackIndex !== null && (
+        <StackCarousel
+          stacks={localStacks}
+          initialIndex={viewingStackIndex}
+          onClose={closeStackViewer}
+        />
       )}
     </div>
   );

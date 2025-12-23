@@ -7,6 +7,8 @@ interface ImageUploadProps {
   bucket?: string;
   className?: string;
   label?: string;
+  children?: React.ReactNode;
+  iconOnly?: boolean;
 }
 
 export function ImageUpload({
@@ -14,6 +16,7 @@ export function ImageUpload({
   bucket = "social-images",
   className = "",
   label = "Upload Image",
+  children,
 }: ImageUploadProps) {
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -24,7 +27,10 @@ export function ImageUpload({
       setError(null);
 
       const file = event.target.files?.[0];
-      if (!file) return;
+      if (!file) {
+        setUploading(false); // Reset if no file selected
+        return;
+      }
 
       const formData = new FormData();
       formData.append("file", file);
@@ -52,8 +58,8 @@ export function ImageUpload({
 
   return (
     <div className={`flex flex-col items-center gap-2 ${className}`}>
-      <label className="cursor-pointer bg-slate-800 hover:bg-slate-700 text-white py-2 px-4 rounded transition-colors">
-        {uploading ? "Uploading..." : label}
+      <label className={`cursor-pointer ${!children ? "bg-slate-800 hover:bg-slate-700 text-white py-2 px-4 rounded transition-colors" : ""}`}>
+        {uploading ? "Uploading..." : (children || label)}
         <input
           type="file"
           accept="image/*"

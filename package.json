@@ -11,6 +11,8 @@
     "db:push": "drizzle-kit push"
   },
   "dependencies": {
+    "@giphy/js-fetch-api": "^5.7.0",
+    "@giphy/react-components": "^10.1.1",
     "@reown/appkit": "^1.8.15",
     "@reown/appkit-adapter-solana": "^1.8.15",
     "@solana/wallet-adapter-wallets": "^0.19.37",
@@ -28,6 +30,7 @@
     "tap": "^21.5.0",
     "thread-stream": "^4.0.0",
     "tweetnacl": "^1.0.3",
+    "yet-another-react-lightbox": "^3.28.0",
     "zod": "^3.25.76"
   },
   "devDependencies": {
