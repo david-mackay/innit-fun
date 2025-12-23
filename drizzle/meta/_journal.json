@@ -1,0 +1,34 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1766433748951,
+      "tag": "20251222200228_numerous_absorbing_man",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1766438982871,
+      "tag": "20251222212942_new_meggan",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1766442950120,
+      "tag": "20251222223550_chubby_hairball",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1766449533963,
+      "tag": "20251223002533_right_ser_duncan",
+      "breakpoints": true
+    }
+  ]
+}
