@@ -141,7 +141,7 @@ export default function InviteLandingPage() {
           <h1 className="text-2xl font-bold text-white mb-2">
             {event
               ? `Join ${invite.creator.displayName || "a friend"} at an event`
-              : `Join ${invite.creator.displayName || "a friend"} on Vibe`}
+              : `Join ${invite.creator.displayName || "a friend"} on Innit`}
           </h1>
           <p className="text-slate-400">
             {event

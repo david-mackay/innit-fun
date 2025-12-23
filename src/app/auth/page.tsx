@@ -33,9 +33,9 @@ export default function AuthPage() {
     <div className="min-h-screen flex items-center justify-center px-4 bg-zinc-50 dark:bg-black">
       <div className="w-full max-w-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 p-8 rounded-lg space-y-5">
         <div className="space-y-1">
-          <h1 className="text-xl font-semibold">Sign in</h1>
+          <h1 className="text-xl font-semibold">Welcome to Innit</h1>
           <p className="text-sm text-zinc-600 dark:text-zinc-400">
-            Use Reown email login to continue.
+            The social layer. Connect to continue.
           </p>
         </div>
 
@@ -47,14 +47,14 @@ export default function AuthPage() {
 
         <button
           onClick={handleSignIn}
-          className="w-full px-4 py-2 rounded bg-black text-white dark:bg-white dark:text-black text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full px-4 py-2 rounded-xl bg-indigo-600 text-white hover:bg-indigo-500 transition-all font-bold disabled:opacity-50 disabled:cursor-not-allowed"
           disabled={isLoading}
         >
-          {isLoading ? "Signing in…" : "Sign in with email"}
+          {isLoading ? "Connecting…" : "Connect / Sign Up"}
         </button>
 
-        <p className="text-xs text-zinc-500 dark:text-zinc-500">
-          Connect with Reown to create a session. Email login is supported.
+        <p className="text-xs text-zinc-500 dark:text-zinc-500 text-center">
+          By connecting, you agree to our Terms of Service.
         </p>
       </div>
     </div>

@@ -259,7 +259,7 @@ export default function ChatPage() {
                           {msg.amount} SOL
                         </p>
                         <p className="text-[10px] font-bold opacity-70 uppercase tracking-wider">
-                          Sent with Vibe
+                          Sent with Innit
                         </p>
                       </div>
                     </div>

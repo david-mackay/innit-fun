@@ -24,8 +24,8 @@ if (!projectId) {
 }
 
 const metadata = {
-  name: "Vibe Code Starter",
-  description: "Starter CRUD with Supabase + Reown auth",
+  name: "Innit",
+  description: "The Social Layer",
   url: "http://localhost:3000",
   icons: ["http://localhost:3000/favicon.ico"],
 };

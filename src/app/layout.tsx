@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Vibe Code Starter",
-  description: "Starter CRUD with Supabase + Reown auth",
+  title: "Innit - The Social Layer",
+  description: "Connect, vibe, and coordinate with friends.",
 };
 
 export default function RootLayout({
