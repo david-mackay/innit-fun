@@ -1,16 +1,17 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useAppKit, useAppKitAccount } from "@reown/appkit/react";
+import { useAppKitAccount } from "@reown/appkit/react";
 
 import { useWalletAuth } from "@/hooks/useWalletAuth";
+import { CustomConnectModal } from "@/components/auth/CustomConnectModal";
 
 export default function AuthPage() {
   const router = useRouter();
   const walletAuth = useWalletAuth();
-  const { open } = useAppKit();
   const { isConnected } = useAppKitAccount();
+  const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
     if (walletAuth.status === "authenticated") {
@@ -23,7 +24,7 @@ export default function AuthPage() {
 
   const handleSignIn = () => {
     if (!isConnected) {
-      open();
+      setShowModal(true);
     } else if (walletAuth.status === "unauthenticated") {
       walletAuth.authenticate();
     }
@@ -57,6 +58,11 @@ export default function AuthPage() {
           By connecting, you agree to our Terms of Service.
         </p>
       </div>
+
+      <CustomConnectModal
+        isOpen={showModal}
+        onClose={() => setShowModal(false)}
+      />
     </div>
   );
 }
